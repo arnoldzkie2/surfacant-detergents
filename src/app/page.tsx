@@ -1,7 +1,9 @@
+'use client'
+import { redirect } from "next/navigation"
 
 const Page = () => {
 
-  return <div>Hello world</div>
+  return redirect('/admin')
 }
 
 export default Page
