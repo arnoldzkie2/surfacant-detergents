@@ -7,6 +7,9 @@ const prisma = new PrismaClient()
 export const GET = async () => {
     try {
 
+        await prisma.category.deleteMany()
+        await prisma.order.deleteMany()
+
         //return all category
         const allCategory = await prisma.category.findMany()
         if (!allCategory) return badRequestRes("Failed to get all category")
