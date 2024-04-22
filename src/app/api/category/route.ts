@@ -1,14 +1,9 @@
 import { badRequestRes, createdRes, notFoundRes, okayRes, serverErrorRes } from "@/lib/api/apiResponse";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/db";
 import { NextRequest } from "next/server";
-
-const prisma = new PrismaClient()
 
 export const GET = async () => {
     try {
-
-        await prisma.category.deleteMany()
-        await prisma.order.deleteMany()
 
         //return all category
         const allCategory = await prisma.category.findMany()
