@@ -1,4 +1,4 @@
-import { badRequestRes, createdRes, notFoundRes, okayRes, serverErrorRes } from "@/lib/api/apiResponse";
+import { badRequestRes, createdRes, getSearchParams, notFoundRes, okayRes, serverErrorRes } from "@/lib/api/apiResponse";
 import prisma from "@/lib/db";
 import { NextRequest } from "next/server";
 
@@ -68,6 +68,23 @@ export const PATCH = async (req: NextRequest) => {
         //return 200 response
         return okayRes(updateCategory)
 
+    } catch (error) {
+        console.log(error);
+        return serverErrorRes(error)
+    } finally {
+        await prisma.$disconnect()
+    }
+}
+
+export const DELETE = async (req: NextRequest) => {
+    try {
+        const categoryID = getSearchParams(req, 'categoryID')
+
+        if (!categoryID) return notFoundRes("Category")
+
+        await prisma.category.delete({ where: { id: Number(categoryID) } })
+
+        return okayRes()
     } catch (error) {
         console.log(error);
         return serverErrorRes(error)
