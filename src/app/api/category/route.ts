@@ -6,10 +6,24 @@ export const GET = async () => {
     try {
 
         //return all category
-        const allCategory = await prisma.category.findMany()
+        const allCategory = await prisma.category.findMany({
+            include: {
+                orders: {
+                    select: {
+                        id: true
+                    }
+                }
+            }
+        })
         if (!allCategory) return badRequestRes("Failed to get all category")
 
-        return okayRes(allCategory)
+        const modifyCategory = allCategory.map(category => ({
+            ...category,
+            orders: undefined,
+            total_orders: category.orders.length
+        }))
+
+        return okayRes(modifyCategory)
 
     } catch (error) {
         console.log(error);

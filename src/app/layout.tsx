@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import NextAuthSessionProvider from "@/components/auth/SessionProvider";
 
 export const metadata: Metadata = {
   title: "Surfacant Detergents",
@@ -16,14 +17,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        <NextAuthSessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="theme"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </NextAuthSessionProvider>
         <Toaster />
       </body>
     </html>

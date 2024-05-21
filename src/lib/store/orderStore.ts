@@ -64,7 +64,15 @@ type OrderStore = {
         setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
         setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     }) => Promise<string | number | undefined>
-    getSingleOrder: (orderID: string, setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>) => Promise<void>
+    getSingleOrder: (orderID: number, setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>) => Promise<void>
+    deleteOrder: (e: React.MouseEvent, orderID: number) => Promise<void>
+    updateOrder: ({ e, formData, setFormData, setOpen, orderID }: {
+        e: React.FormEvent;
+        formData: OrderFormData;
+        setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
+        setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+        orderID: number;
+    }) => Promise<string | number | undefined>
 }
 
 export { initialFormData }
@@ -92,15 +100,21 @@ export const useOrderStore = create<OrderStore>()((set, get) => ({
             alert("Something went wrongw")
         }
     },
-    getSingleOrder: async (orderID: string, setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>
+    getSingleOrder: async (orderID: number, setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>
     ) => {
+
+
+        const { setCategoryID } = useCategoryStore.getState()
         try {
 
             const { data } = await axios.get('/api/order', {
                 params: { orderID }
             })
 
-            if (data.ok) setFormData(data.data)
+            if (data.ok) {
+                setFormData(data.data)
+                setCategoryID(data.data.category_id)
+            }
 
         } catch (error) {
             console.log(error);
@@ -155,6 +169,83 @@ export const useOrderStore = create<OrderStore>()((set, get) => ({
                 return toast.error(error.response.data.msg)
             }
             alert("Something went wrong")
+        }
+    },
+    updateOrder: async ({ e, formData, setFormData, setOpen, orderID }:
+        {
+            e: React.FormEvent
+            formData: OrderFormData
+            setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>
+            setOpen: React.Dispatch<React.SetStateAction<boolean>>
+            orderID: number
+        }) => {
+
+        const { setLoading } = useGlobalStore.getState()
+        const { getOrders } = get()
+
+        e.preventDefault()
+
+        const { categoryID } = useCategoryStore.getState()
+
+        if (!categoryID) return toast.error("Select Category", { position: 'bottom-center' })
+
+        const updatedFormData = {
+            ...formData,
+            rev_no: Number(formData.rev_no),
+            vat: Number(formData.vat),
+            discount: Number(formData.discount),
+            price: Number(formData.price),
+            quantity: Number(formData.quantity),
+            category_id: Number(categoryID)
+        }
+
+
+        try {
+
+            setLoading(true)
+            const { data } = await axios.patch('/api/order', updatedFormData, {
+                params: {
+                    orderID
+                }
+            })
+
+            if (data.ok) {
+                getOrders()
+                setLoading(false)
+                setOpen(false)
+                setFormData(initialFormData)
+                toast.success("Success! order updated.")
+            }
+
+        } catch (error: any) {
+            setLoading(false)
+            console.log(error);
+            if (error.response.data.msg) {
+                return toast.error(error.response.data.msg)
+            }
+            alert("Something went wrong")
+        }
+
+    },
+    deleteOrder: async (e: React.MouseEvent, orderID: number) => {
+
+        e.preventDefault()
+        const { getOrders } = get()
+
+        try {
+            const { data } = await axios.delete('/api/order', {
+                params: {
+                    orderID
+                }
+            })
+
+            if (data.ok) {
+                toast.success("Success Order deleted.")
+                getOrders()
+            }
+
+        } catch (error) {
+            console.log(error);
         }
     }
 }))

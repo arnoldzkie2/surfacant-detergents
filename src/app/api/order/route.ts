@@ -90,3 +90,46 @@ export const POST = async (req: NextRequest) => {
         await prisma.$disconnect()
     }
 }
+
+export const PATCH = async (req: NextRequest) => {
+
+    try {
+
+        const orderID = getSearchParams(req, 'orderID')
+
+        const body: Order = await req.json()
+
+        const updateOrder = await prisma.order.update({
+            where: {
+                id: Number(orderID)
+            }, data: body
+        })
+        if (!updateOrder) badRequestRes("Failed to update order")
+
+        return okayRes()
+
+    } catch (error) {
+        console.log(error);
+        return serverErrorRes(error)
+    } finally {
+        await prisma.$disconnect()
+    }
+}
+
+export const DELETE = async (req: NextRequest) => {
+
+
+    try {
+        const orderID = getSearchParams(req, 'orderID')
+
+        await prisma.order.delete({ where: { id: Number(orderID) } })
+
+        return okayRes()
+
+    } catch (error) {
+        console.log(error);
+        return serverErrorRes(error)
+    } finally {
+        await prisma.$disconnect()
+    }
+}

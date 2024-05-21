@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { Input } from '../ui/input'
-import { Label } from '../ui/label'
-import { Button } from '../ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 import { useCategoryStore } from '@/lib/store/categoryStore'
-import SubmitButton from '../ui/submit-button'
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog'
+import SubmitButton from '@/components/ui/submit-button'
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 const NewCategory = () => {
 
@@ -15,7 +15,7 @@ const NewCategory = () => {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <Button onClick={() => setOpen(true)} variant={'outline'}>New Category</Button>
+      <Button onClick={() => setOpen(true)} className='w-32'>New Category</Button>
       <AlertDialogContent className='w-96'>
         <AlertDialogHeader>
           <AlertDialogTitle>Create New Category</AlertDialogTitle>
