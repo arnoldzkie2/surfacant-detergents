@@ -1,6 +1,7 @@
 'use client'
 import LoginForm from '@/components/auth/LoginForm'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useGlobalStore } from '@/lib/store/globalStore'
 import { signIn, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -15,6 +16,7 @@ const AdminAuthPage = () => {
 
     const session = useSession()
     const router = useRouter()
+    const { setLoading } = useGlobalStore()
 
     const [inputType, setInputType] = useState<'text' | 'password'>('password')
 
@@ -22,11 +24,13 @@ const AdminAuthPage = () => {
         e.preventDefault()
         try {
 
+            setLoading(true)
             const result = await signIn('credentials', {
                 username: formData.username,
                 password: formData.password,
                 redirect: false,
             })
+            setLoading(false)
             if (result?.error) {
                 toast.error('Invalid Credentials.', {
                     position: 'bottom-center'
@@ -38,6 +42,7 @@ const AdminAuthPage = () => {
             }
 
         } catch (error) {
+            setLoading(false)
             console.log(error);
             alert("Something went wrong")
         }

@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
+import SubmitButton from '../ui/submit-button'
 
 interface Props {
     formData: {
@@ -43,7 +44,7 @@ const LoginForm: React.FC<Props> = ({ loginAdmin, formData, setFormData, setInpu
                     />
                 </div>
             </div>
-            <Button>Sign In</Button>
+            <SubmitButton msg='Sign In' />
         </form>
     )
 }
