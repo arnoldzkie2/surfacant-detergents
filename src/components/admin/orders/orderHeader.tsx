@@ -1,7 +1,8 @@
+import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCategoryStore } from '@/lib/store/categoryStore'
+import Link from 'next/link'
 import React from 'react'
-import NewOrder from './NewOrder'
 
 const OrderHeader = () => {
   const { category, categoryID, setCategoryID } = useCategoryStore()
@@ -22,7 +23,11 @@ const OrderHeader = () => {
           </SelectGroup>
         </SelectContent>
       </Select>
-      <NewOrder />
+      <Link href={'/admin/orders/new'}>
+        <Button>
+          Create New Order
+        </Button>
+      </Link>
     </div>
   )
 }

@@ -51,7 +51,7 @@ const PrintOrder = ({ order }: { order: Order }) => {
                 </div>
             </AlertDialogTrigger>
             <AlertDialogContent>
-                <div>
+                {/* <div>
                     <div ref={orderRef} className='flex flex-col gap-5 p-5 text-black rounded-lg bg-white'>
                         <h1>Order Details</h1>
                         <p>Order ID: {order.id}</p>
@@ -59,7 +59,7 @@ const PrintOrder = ({ order }: { order: Order }) => {
                         <p>Prepared by: ${order.prepared_by}</p>
                         <p>Prepared by: ${order.prepared_by}</p>
                     </div>
-                </div>
+                </div> */}
                 <div className='flex items-center gap-10 w-full'>
                     <Button className='w-full' onClick={handleGeneratePdf}>Print</Button>
                     <Button variant={'ghost'} className='w-full' onClick={() => setOpen(false)}>Close</Button>

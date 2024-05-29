@@ -25,24 +25,24 @@ const ViewOrder = ({ orderID }: { orderID: number }) => {
 
     const [discountedPrice, setDiscountedPrice] = useState(0);
 
-    useEffect(() => {
-        // Calculate the discounted price when formData, price, quantity, discount, or vat changes
-        const calculateDiscountedPrice = () => {
-            const totalPrice = formData.price * formData.quantity;
-            const discountAmount = (formData.discount / 100) * totalPrice;
-            const discountedPriceWithoutVAT = totalPrice - discountAmount;
-            const vatAmount = (formData.vat / 100) * discountedPriceWithoutVAT;
-            const discountedPriceWithVAT = discountedPriceWithoutVAT + vatAmount;
-            setDiscountedPrice(discountedPriceWithVAT);
-        };
+    // useEffect(() => {
+    //     // Calculate the discounted price when formData, price, quantity, discount, or vat changes
+    //     const calculateDiscountedPrice = () => {
+    //         const totalPrice = formData.price * formData.quantity;
+    //         const discountAmount = (formData.discount / 100) * totalPrice;
+    //         const discountedPriceWithoutVAT = totalPrice - discountAmount;
+    //         const vatAmount = (formData.vat / 100) * discountedPriceWithoutVAT;
+    //         const discountedPriceWithVAT = discountedPriceWithoutVAT + vatAmount;
+    //         setDiscountedPrice(discountedPriceWithVAT);
+    //     };
 
-        calculateDiscountedPrice();
-    }, [formData, formData.price, formData.quantity, formData.discount, formData.vat]);
+    //     calculateDiscountedPrice();
+    // }, [formData, formData.price, formData.quantity, formData.discount, formData.vat]);
 
-    useEffect(() => {
-        if (open) getSingleOrder(orderID, setFormData)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [orderID, open])
+    // useEffect(() => {
+    //     if (open) getSingleOrder(orderID, setFormData)
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [orderID, open])
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
@@ -114,43 +114,6 @@ const ViewOrder = ({ orderID }: { orderID: number }) => {
                                 <Input readOnly value={formData.client_email} name='client_email' onChange={handleChange} />
                             </div>
                         </div>
-                    </div>
-                    <div className='flex flex-col gap-4'>
-                        <Label className='border-b pb-1 text-lg'>Item Details</Label>
-                        <div className='flex items-center gap-10'>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Unit</Label>
-                                <Input readOnly value={formData.unit} name='unit' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Unit Price</Label>
-                                <Input readOnly type='number' value={formData.price} name='price' onChange={handleChange} />
-                            </div>
-                        </div>
-                        <div className='flex items-center gap-10'>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Quantity</Label>
-                                <Input readOnly type='number' value={formData.quantity} name='quantity' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Discount %</Label>
-                                <Input readOnly type='number' value={formData.discount} name='discount' onChange={handleChange} />
-                            </div>
-                        </div>
-                        <div className='flex items-center gap-10'>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Vat %</Label>
-                                <Input readOnly type='number' value={formData.vat} name='vat' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Total</Label>
-                                <Input value={discountedPrice} readOnly />
-                            </div>
-                        </div>
-                    </div>
-                    <div className='flex flex-col gap-1.5'>
-                        <Label>Description</Label>
-                        <Textarea readOnly value={formData.description} name='description' onChange={handleChange} />
                     </div>
                     <div className='flex flex-col gap-1.5'>
                         <Label>Prepared By</Label>
