@@ -7,7 +7,7 @@ import React from 'react'
 const OrdersPage = () => {
     return (
         <div className='px-5 sm:px-10 md:container'>
-            <Header />
+            <Header currentPage="orders" />
             <div className='pt-20 flex flex-col gap-10'>
                 <OrderHeader />
                 <OrderTable />

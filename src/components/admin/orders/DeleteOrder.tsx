@@ -3,6 +3,8 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useOrderStore } from '@/lib/store/orderStore'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTrash } from '@fortawesome/free-solid-svg-icons'
 
 const DeleteOrder = ({ orderID }: { orderID: number }) => {
 
@@ -13,7 +15,10 @@ const DeleteOrder = ({ orderID }: { orderID: number }) => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Label className='cursor-pointer hover:text-foreground'>Delete</Label>
+                <div className='flex items-center hover:text-foreground justify-between'>
+                    <Label className='cursor-pointer'>Delete</Label>
+                    <FontAwesomeIcon icon={faTrash} width={16} height={16} />
+                </div>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

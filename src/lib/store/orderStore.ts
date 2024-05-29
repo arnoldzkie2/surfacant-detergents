@@ -4,9 +4,10 @@ import { create } from 'zustand'
 import { useCategoryStore } from './categoryStore'
 import { toast } from 'sonner'
 import { useGlobalStore } from './globalStore'
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
 
-const initialFormData = {
+const initialFormData: OrderFormData = {
     rev_no: 0,
     vendor_ref: '',
     vendor_company: '',
@@ -19,10 +20,13 @@ const initialFormData = {
     client_contact: '',
     client_phone: '',
     client_email: '',
-    unit: '',
-    description: '',
-    quantity: 0,
-    price: 0,
+    items: [{
+        total_price: '',
+        price: '',
+        description: '',
+        unit: '',
+        quantity: 1
+    }],
     discount: 0,
     vat: 0,
     prepared_by: '',
@@ -44,10 +48,13 @@ interface OrderFormData {
     client_contact: string;
     client_phone: string;
     client_email: string;
-    unit: string;
-    description: string;
-    quantity: number;
-    price: number;
+    items: {
+        total_price: string
+        price: string
+        unit: string
+        quantity: number
+        description: string
+    }[]
     discount: number;
     vat: number;
     prepared_by: string;
@@ -58,19 +65,19 @@ interface OrderFormData {
 type OrderStore = {
     orders: Order[] | null
     getOrders: () => Promise<any>
-    createOrder: ({ e, formData, setFormData, setOpen }: {
+    createOrder: ({ e, formData }: {
         e: React.FormEvent;
         formData: OrderFormData;
-        setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
-        setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+        calculateTotalValue: () => number
+        router: AppRouterInstance
     }) => Promise<string | number | undefined>
     getSingleOrder: (orderID: number, setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>) => Promise<void>
     deleteOrder: (e: React.MouseEvent, orderID: number) => Promise<void>
-    updateOrder: ({ e, formData, setFormData, setOpen, orderID }: {
+    updateOrder: ({ e, formData, orderID }: {
         e: React.FormEvent;
         formData: OrderFormData;
-        setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
-        setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+        calculateTotalValue: () => number
+        router: AppRouterInstance
         orderID: number;
     }) => Promise<string | number | undefined>
 }
@@ -102,8 +109,6 @@ export const useOrderStore = create<OrderStore>()((set, get) => ({
     },
     getSingleOrder: async (orderID: number, setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>
     ) => {
-
-
         const { setCategoryID } = useCategoryStore.getState()
         try {
 
@@ -112,6 +117,7 @@ export const useOrderStore = create<OrderStore>()((set, get) => ({
             })
 
             if (data.ok) {
+                data.data.items = JSON.parse(data.data.items)
                 setFormData(data.data)
                 setCategoryID(data.data.category_id)
             }
@@ -121,16 +127,15 @@ export const useOrderStore = create<OrderStore>()((set, get) => ({
             alert("Something went wrong")
         }
     },
-    createOrder: async ({ e, formData, setFormData, setOpen }:
+    createOrder: async ({ e, formData, router, calculateTotalValue }:
         {
             e: React.FormEvent
             formData: OrderFormData
-            setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>
-            setOpen: React.Dispatch<React.SetStateAction<boolean>>
+            calculateTotalValue: () => number
+            router: AppRouterInstance
         }) => {
 
         const { setLoading } = useGlobalStore.getState()
-        const { getOrders } = get()
 
         e.preventDefault()
 
@@ -141,13 +146,15 @@ export const useOrderStore = create<OrderStore>()((set, get) => ({
         const updatedFormData = {
             ...formData,
             rev_no: Number(formData.rev_no),
-            vat: Number(formData.vat),
-            discount: Number(formData.discount),
-            price: Number(formData.price),
-            quantity: Number(formData.quantity),
+            discount: String(formData.discount),
+            vat: String(formData.vat),
+            sub_total: formData.items.reduce((total, item) => {
+                return total + (Number(item.price) * Number(item.quantity))
+            }, 0).toString(),
+            total_value: calculateTotalValue().toString(),
+            items: JSON.stringify(formData.items),
             category_id: Number(categoryID)
         }
-
 
         try {
 
@@ -155,11 +162,9 @@ export const useOrderStore = create<OrderStore>()((set, get) => ({
             const { data } = await axios.post('/api/order', updatedFormData)
 
             if (data.ok) {
-                getOrders()
                 setLoading(false)
-                setOpen(false)
-                setFormData(initialFormData)
                 toast.success("Success! order created.")
+                router.push('/admin/orders')
             }
 
         } catch (error: any) {
@@ -171,13 +176,13 @@ export const useOrderStore = create<OrderStore>()((set, get) => ({
             alert("Something went wrong")
         }
     },
-    updateOrder: async ({ e, formData, setFormData, setOpen, orderID }:
+    updateOrder: async ({ e, formData, router, calculateTotalValue, orderID }:
         {
             e: React.FormEvent
             formData: OrderFormData
-            setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>
-            setOpen: React.Dispatch<React.SetStateAction<boolean>>
             orderID: number
+            calculateTotalValue: () => number
+            router: AppRouterInstance
         }) => {
 
         const { setLoading } = useGlobalStore.getState()
@@ -192,13 +197,15 @@ export const useOrderStore = create<OrderStore>()((set, get) => ({
         const updatedFormData = {
             ...formData,
             rev_no: Number(formData.rev_no),
-            vat: Number(formData.vat),
-            discount: Number(formData.discount),
-            price: Number(formData.price),
-            quantity: Number(formData.quantity),
+            discount: String(formData.discount),
+            vat: String(formData.vat),
+            sub_total: formData.items.reduce((total, item) => {
+                return total + (Number(item.price) * Number(item.quantity))
+            }, 0).toString(),
+            total_value: calculateTotalValue().toString(),
+            items: JSON.stringify(formData.items),
             category_id: Number(categoryID)
         }
-
 
         try {
 
@@ -212,9 +219,8 @@ export const useOrderStore = create<OrderStore>()((set, get) => ({
             if (data.ok) {
                 getOrders()
                 setLoading(false)
-                setOpen(false)
-                setFormData(initialFormData)
                 toast.success("Success! order updated.")
+                router.push("/admin/orders")
             }
 
         } catch (error: any) {

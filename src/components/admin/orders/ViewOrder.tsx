@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEye } from '@fortawesome/free-solid-svg-icons'
 
 const ViewOrder = ({ orderID }: { orderID: number }) => {
 
@@ -45,7 +47,10 @@ const ViewOrder = ({ orderID }: { orderID: number }) => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Label className='cursor-pointer hover:text-foreground'>View</Label>
+                <div className='flex items-center hover:text-foreground justify-between'>
+                    <Label className='cursor-pointer'>View</Label>
+                    <FontAwesomeIcon icon={faEye} width={16} height={16} />
+                </div>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

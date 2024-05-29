@@ -8,15 +8,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faRightToBracket } from '@fortawesome/free-solid-svg-icons'
 import { signOut } from 'next-auth/react'
 import { Label } from '../ui/label'
-const Header = () => {
+
+const Header = ({ currentPage }: { currentPage: string }) => {
+
     return (
         <div className='flex top-0 left-0 w-screen padding fixed md:sticky md:p-0 md:w-full h-16 backdrop-blur padding items-center z-50 justify-between border-b'>
             <h1 className='text-2xl font-black text-primary'>Surfacant</h1>
             <ul className='flex items-center gap-5 text-muted-foreground'>
-                <Link href={'/admin/category'} className='hover:text-foreground'>
+                <Link href={'/admin/category'} className={`py-1 ${currentPage === 'category' ? 'text-foreground border-b border-primary' : 'hover:text-foreground'}`}>
                     <Label className='cursor-pointer'>Category</Label>
                 </Link>
-                <Link href={'/admin/orders'} className='hover:text-foreground'>
+                <Link href={'/admin/orders'} className={`py-1 ${currentPage === 'orders' ? 'text-foreground border-b border-primary' : 'hover:text-foreground'}`}>
                     <Label className='cursor-pointer'>Orders</Label>
                 </Link>
             </ul>

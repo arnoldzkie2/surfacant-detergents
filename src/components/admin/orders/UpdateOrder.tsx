@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import SubmitButton from '@/components/ui/submit-button'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPenToSquare } from '@fortawesome/free-solid-svg-icons'
 
 const UpdateOrder = ({ orderID }: { orderID: number }) => {
 
@@ -46,7 +48,10 @@ const UpdateOrder = ({ orderID }: { orderID: number }) => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Label className='cursor-pointer hover:text-foreground'>Update</Label>
+                <div className='flex items-center hover:text-foreground justify-between'>
+                    <Label className='cursor-pointer'>Update</Label>
+                    <FontAwesomeIcon icon={faPenToSquare} width={16} height={16} />
+                </div>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

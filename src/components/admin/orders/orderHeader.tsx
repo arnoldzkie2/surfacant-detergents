@@ -4,7 +4,7 @@ import React from 'react'
 import NewOrder from './NewOrder'
 
 const OrderHeader = () => {
-  const { category, getAllCategory, categoryID, setCategoryID } = useCategoryStore()
+  const { category, categoryID, setCategoryID } = useCategoryStore()
 
   return (
     <div className='flex items-center gap-5 self-start'>

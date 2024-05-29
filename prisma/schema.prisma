@@ -9,17 +9,24 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model Order {
   //purchase order details
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  vendor_ref String
-  rev_no     Int
+  id          Int      @id @default(autoincrement())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  vendor_ref  String
+  rev_no      Int
+  prepared_by String
+  checked_by  String
+  approved_by String
+  sub_total   String
+  total_value String
+  discount    String
+  vat         String
 
   //vendor details
   vendor_company String
@@ -34,17 +41,13 @@ model Order {
   client_contact String
   client_phone   String
   client_email   String
-
   //description of purchases details
-  unit        String
-  description String
-  quantity    Int
-  price       Decimal
-  discount    Decimal
-  vat         Decimal
-  prepared_by String
-  checked_by  String
-  approved_by String
+  items          String @db.Text
+  // total_price
+  // price       String
+  // unit        String
+  // description String
+  // quantity    Int
 
   //category details
   category    Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
