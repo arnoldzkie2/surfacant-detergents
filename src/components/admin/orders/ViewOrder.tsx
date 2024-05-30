@@ -101,7 +101,7 @@ const ViewOrder = ({ order }: {
                         </div>
                         <div className='flex w-full'>
                             <Label className='w-1/2  border-r-2 border-black p-2'>Address</Label>
-                            <div className='p-2 w-full bg-green-200'>{order.vendor_address} lorem</div>
+                            <div className='p-2 w-full bg-green-200'>{order.vendor_address}</div>
                         </div>
                         <div className='flex w-full'>
                             <Label className='w-1/2  border-r-2 border-black p-2'>Contact</Label>
