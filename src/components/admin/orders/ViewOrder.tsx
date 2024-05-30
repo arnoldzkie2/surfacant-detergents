@@ -64,7 +64,7 @@ const ViewOrder = ({ order }: {
 
     return (
         <div className='flex flex-col gap-5 w-full'>
-            <div className='bg-white text-black p-10 flex flex-col gap-8 w-1000 min-w-[1000px] self-center' ref={orderRef}>
+            <div className='bg-white text-black border-2 border-black p-10 flex flex-col gap-8 w-1000 min-w-[1000px] self-center' ref={orderRef}>
                 <div className='flex w-full justify-between'>
                     <div className='flex flex-col gap-3'>
                         <img width={150} height={60} src={'/logo.svg'} alt='Logo' />
