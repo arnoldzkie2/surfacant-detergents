@@ -94,7 +94,7 @@ const ViewOrder = ({ order }: {
                 </div>
                 <div className='flex justify-between w-full'>
                     <div className='flex flex-col border border-black w-96'>
-                        <h1 className='w-full border-b border-black text-center bg-slate-200'>Vendor Details</h1>
+                        <h1 className='w-full border-b border-black text-center bg-slate-200 text-lg font-bold'>Vendor Details</h1>
                         <div className='flex w-full'>
                             <Label className='w-1/2  border-r-2 border-black p-2'>Company</Label>
                             <div className='p-2 w-full bg-green-200'>{order.vendor_company}</div>
@@ -117,7 +117,7 @@ const ViewOrder = ({ order }: {
                         </div>
                     </div>
                     <div className='flex flex-col border border-black w-96'>
-                        <h1 className='w-full border-b border-black text-center bg-slate-200'>Client Details</h1>
+                        <h1 className='w-full border-b border-black text-center bg-slate-200  text-lg font-bold'>Client Details</h1>
                         <div className='flex w-full'>
                             <Label className='w-1/2  border-r-2 border-black p-2'>Company</Label>
                             <div className='p-2 w-full bg-green-200'>{order.client_company}</div>
