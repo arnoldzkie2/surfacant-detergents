@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useRouter } from 'next/navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
+import SubmitButton from '@/components/ui/submit-button'
 
 const OrderForm = ({ orderID }: { orderID?: number }) => {
 
@@ -298,7 +299,7 @@ const OrderForm = ({ orderID }: { orderID?: number }) => {
           <Link href={'/admin/orders'}>
             <Button type='button' variant={'ghost'} className='w-36'>Back</Button>
           </Link>
-          <Button className='ml-auto w-36'>{orderID ? 'Update' : 'Create'}</Button>
+          <SubmitButton msg={orderID ? 'Update' : 'Create'} style='ml-auto w-36' />
         </div>
       </div>
     </form>
