@@ -1,151 +1,261 @@
-import React, { useEffect, useState } from 'react'
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { OrderFormData, initialFormData, useOrderStore } from '@/lib/store/orderStore'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useCategoryStore } from '@/lib/store/categoryStore'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye } from '@fortawesome/free-solid-svg-icons'
+/* eslint-disable @next/next/no-img-element */
+'use client'
+import { Order } from '@prisma/client'
+import React, { useRef } from 'react'
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Label } from '@/components/ui/label';
+import { useReactToPrint } from 'react-to-print';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-const ViewOrder = ({ orderID }: { orderID: number }) => {
 
-    const [open, setOpen] = useState(false)
-    const [formData, setFormData] = useState<OrderFormData>(initialFormData)
+const ViewOrder = ({ order }: {
+    order: Order
+}) => {
 
-    const { getSingleOrder } = useOrderStore()
-    const { category, setCategoryID, categoryID } = useCategoryStore()
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target
+    const orderRef = useRef<any>(null)
 
-        setFormData(prev => ({ ...prev, [name]: value }))
+    const handleGeneratePdf = useReactToPrint({
+        content: () => orderRef.current,
+        documentTitle: `SDC-${order.id}.pdf`
+    })
+
+    const calculateDiscountedTotal = () => {
+        const items = JSON.parse(order.items) as {
+            unit: string;
+            price: string;
+            total_price: string;
+            description: string;
+            quantity: number;
+        }[];
+
+        const subtotal = items.reduce((total, item) => {
+            return total + (Number(item.price) * Number(item.quantity));
+        }, 0);
+
+        const discountAmount = (subtotal * (Number(order.discount) / 100));
+        const discountedSubtotal = subtotal - discountAmount; // Subtotal after deducting discount
+
+        return discountedSubtotal;
+    };
+
+    const calculateTotalValue = () => {
+
+        const items = JSON.parse(order.items) as {
+            unit: string
+            price: string
+            total_price: string
+            description: string
+            quantity: number
+        }[]
+        const subtotal = items.reduce((total, item) => {
+            return total + (Number(item.price) * Number(item.quantity))
+        }, 0)
+
+        const discountAmount = (subtotal * (Number(order.discount) / 100));
+        const discountedSubtotal = subtotal - discountAmount; // Subtotal after deducting disacount
+
+        const vatAmount = (discountedSubtotal * (Number(order.vat) / 100)); // Calculate VAT amount based on the discounted subtotal
+
+        const finalTotalValue = discountedSubtotal + vatAmount; // Add VAT amount to the discounted subtotal
+
+        return finalTotalValue
     }
 
-    const [discountedPrice, setDiscountedPrice] = useState(0);
-
-    // useEffect(() => {
-    //     // Calculate the discounted price when formData, price, quantity, discount, or vat changes
-    //     const calculateDiscountedPrice = () => {
-    //         const totalPrice = formData.price * formData.quantity;
-    //         const discountAmount = (formData.discount / 100) * totalPrice;
-    //         const discountedPriceWithoutVAT = totalPrice - discountAmount;
-    //         const vatAmount = (formData.vat / 100) * discountedPriceWithoutVAT;
-    //         const discountedPriceWithVAT = discountedPriceWithoutVAT + vatAmount;
-    //         setDiscountedPrice(discountedPriceWithVAT);
-    //     };
-
-    //     calculateDiscountedPrice();
-    // }, [formData, formData.price, formData.quantity, formData.discount, formData.vat]);
-
-    // useEffect(() => {
-    //     if (open) getSingleOrder(orderID, setFormData)
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [orderID, open])
-
     return (
-        <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogTrigger asChild>
-                <div className='flex items-center hover:text-foreground justify-between'>
-                    <Label className='cursor-pointer'>View</Label>
-                    <FontAwesomeIcon icon={faEye} width={16} height={16} />
+        <div className='flex flex-col gap-5 w-full'>
+            <div className='bg-white text-black p-10 flex flex-col gap-8 w-1000 min-w-[1000px] self-center' ref={orderRef}>
+                <div className='flex w-full justify-between'>
+                    <div className='flex flex-col gap-3'>
+                        <img width={150} height={60} src={'/logo.svg'} alt='Logo' />
+                        <h1 className='text-2xl font-bold italic'>Surfacant Detergents Company</h1>
+                    </div>
+                    <div className='flex flex-col'>
+                        <h1 className='text-2xl font-bold italic'>Purchase Order</h1>
+                        <div className='flex w-52'>
+                            <Label className='border border-black text-base w-1/2 px-1 bg-slate-200 flex items-center'>P.O no.</Label>
+                            <div className='border border-black w-full bg-green-200 text-center'>
+                                SDC-{order.id}
+                            </div>
+                        </div>
+                        <div className='flex w-52'>
+                            <Label className='border border-black text-base w-1/2 px-1 bg-slate-200 flex items-center'>Rev. no.</Label>
+                            <div className='border border-black w-full bg-green-200 text-center'>
+                                {order.rev_no}
+                            </div>
+                        </div>
+                        <div className='flex w-52'>
+                            <Label className='border border-black text-base w-1/2 px-1 bg-slate-200 flex items-center'>Date</Label>
+                            <div className='border border-black w-full bg-green-200 text-center'>
+                                {new Date(order.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-')}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>View Order</AlertDialogTitle>
-                </AlertDialogHeader>
-                <form className='flex flex-col gap-5 overflow-y-auto max-h-[500px] p-2'>
-                    <div className='flex items-center gap-10'>
-                        <div className='flex flex-col gap-1.5'>
-                            <Label>Rev No.</Label>
-                            <Input readOnly value={formData.rev_no} name='rev_no' onChange={handleChange} />
+                <div className='flex justify-between w-full'>
+                    <div className='flex flex-col border border-black w-96'>
+                        <h1 className='w-full border-b border-black text-center bg-slate-200'>Vendor Details</h1>
+                        <div className='flex w-full'>
+                            <Label className='w-1/2  border-r-2 border-black p-2'>Company</Label>
+                            <div className='p-2 w-full bg-green-200'>{order.vendor_company}</div>
                         </div>
-                        <div className='flex flex-col gap-1.5'>
-                            <Label>Vendor Ref</Label>
-                            <Input readOnly value={formData.vendor_ref} name='vendor_ref' onChange={handleChange} />
+                        <div className='flex w-full'>
+                            <Label className='w-1/2  border-r-2 border-black p-2'>Address</Label>
+                            <div className='p-2 w-full bg-green-200'>{order.vendor_address} lorem</div>
                         </div>
-                    </div>
-                    <div className='w-full flex items-center gap-10'>
-                        <div className='flex flex-col gap-4'>
-                            <Label className='border-b pb-1 text-lg'>Vendor Details</Label>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Vendor Company</Label>
-                                <Input readOnly value={formData.vendor_company} name='vendor_company' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Vendor Address</Label>
-                                <Input readOnly value={formData.vendor_address} name='vendor_address' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Vendor Contact</Label>
-                                <Input readOnly value={formData.vendor_contact} name='vendor_contact' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Vendor Phone</Label>
-                                <Input readOnly value={formData.vendor_phone} name='vendor_phone' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Vendor Email</Label>
-                                <Input readOnly value={formData.vendor_email} name='vendor_email' onChange={handleChange} />
-                            </div>
+                        <div className='flex w-full'>
+                            <Label className='w-1/2  border-r-2 border-black p-2'>Contact</Label>
+                            <div className='p-2 w-full bg-green-200'>{order.vendor_contact}</div>
                         </div>
-                        <div className='flex flex-col gap-4'>
-                            <Label className='border-b pb-1 text-lg'>Client Details</Label>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Client Company</Label>
-                                <Input readOnly value={formData.client_company} name='client_company' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Client Address</Label>
-                                <Input readOnly value={formData.client_address} name='client_address' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Client Contact</Label>
-                                <Input readOnly value={formData.client_contact} name='client_contact' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Client Phone</Label>
-                                <Input readOnly value={formData.client_phone} name='client_phone' onChange={handleChange} />
-                            </div>
-                            <div className='flex flex-col gap-1.5'>
-                                <Label>Client Email</Label>
-                                <Input readOnly value={formData.client_email} name='client_email' onChange={handleChange} />
-                            </div>
+                        <div className='flex w-full'>
+                            <Label className='w-1/2  border-r-2 border-black p-2'>Phone</Label>
+                            <div className='p-2 w-full bg-green-200'>{order.vendor_phone}</div>
+                        </div>
+                        <div className='flex w-full'>
+                            <Label className='w-1/2  border-r-2 border-black p-2'>Email</Label>
+                            <div className='p-2 w-full bg-green-200'>{order.vendor_email}</div>
                         </div>
                     </div>
-                    <div className='flex flex-col gap-1.5'>
-                        <Label>Prepared By</Label>
-                        <Input readOnly value={formData.prepared_by} name='prepared_by' onChange={handleChange} />
+                    <div className='flex flex-col border border-black w-96'>
+                        <h1 className='w-full border-b border-black text-center bg-slate-200'>Client Details</h1>
+                        <div className='flex w-full'>
+                            <Label className='w-1/2  border-r-2 border-black p-2'>Company</Label>
+                            <div className='p-2 w-full bg-green-200'>{order.client_company}</div>
+                        </div>
+                        <div className='flex w-full'>
+                            <Label className='w-1/2  border-r-2 border-black p-2'>Address</Label>
+                            <div className='p-2 w-full bg-green-200'>{order.client_address} lorem</div>
+                        </div>
+                        <div className='flex w-full'>
+                            <Label className='w-1/2  border-r-2 border-black p-2'>Contact</Label>
+                            <div className='p-2 w-full bg-green-200'>{order.client_contact}</div>
+                        </div>
+                        <div className='flex w-full'>
+                            <Label className='w-1/2  border-r-2 border-black p-2'>Phone</Label>
+                            <div className='p-2 w-full bg-green-200'>{order.client_phone}</div>
+                        </div>
+                        <div className='flex w-full'>
+                            <Label className='w-1/2  border-r-2 border-black p-2'>Email</Label>
+                            <div className='p-2 w-full bg-green-200'>{order.client_email}</div>
+                        </div>
                     </div>
-                    <div className='flex flex-col gap-1.5'>
-                        <Label>Checked By</Label>
-                        <Input readOnly value={formData.checked_by} name='checked_by' onChange={handleChange} />
+
+                </div>
+                <div className='flex w-full items-center border border-black'>
+                    <div className='w-full flex items-center'>
+                        <Label className='p-1 w-1/2 bg-slate-200 border-r-2 border-black'>Vendor Ref.</Label>
+                        <div className='w-full pl-1 bg-green-200 border-r-2 border-black'>
+                            {order.vendor_ref}
+                        </div>
                     </div>
-                    <div className='flex flex-col gap-1.5'>
-                        <Label>Approved By</Label>
-                        <Input readOnly value={formData.approved_by} name='approved_by' onChange={handleChange} />
+                    <div className='w-full flex items-center'>
+                        <Label className='p-1 w-1/2 bg-slate-200 border-r-2 border-black'>Date</Label>
+                        <div className='w-full pl-1 bg-green-200 border-r-2 border-black'>
+                            {new Date(order.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-')}
+                        </div>
                     </div>
-                    <Select onValueChange={(id) => setCategoryID(id)} value={categoryID}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Category</SelectLabel>
-                                {category && category.length > 0 ? category.map(obj => (
-                                    <SelectItem key={obj.id} value={String(obj.id)}>{obj.name}</SelectItem>
-                                )) : ''}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                    <div className='flex items-center w-full justify-end gap-5'>
-                        <Button className='w-full' variant={'ghost'} type='button' onClick={() => setOpen(false)}>Close</Button>
+                    <div className='w-full flex items-center'>
+                        <Label className='p-1 w-1/2 bg-slate-200 border-r-2 border-black'>Rev no.</Label>
+                        <div className='w-full pl-1 bg-green-200 border-black'>
+                            {order.rev_no}
+                        </div>
                     </div>
-                </form>
-            </AlertDialogContent>
-        </AlertDialog >
+
+                </div>
+                <Label className='uppercase'>
+                    section: 1 - description of purchase and prices
+                </Label>
+                <Table>
+                    <TableHeader>
+                        <TableRow className='border border-black hover:bg-slate-200 bg-slate-200'>
+                            <TableHead className='text-black border-black border-r'>No.</TableHead>
+                            <TableHead className='text-black border-black border-r'>Description</TableHead>
+                            <TableHead className='text-black border-black border-r'>Qty</TableHead>
+                            <TableHead className='text-black border-black border-r'>Unit</TableHead>
+                            <TableHead className='text-black border-black border-r'>Unit Price</TableHead>
+                            <TableHead className='text-black border-black border-r'>Total (SR)</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {JSON.parse(order.items).map((item: {
+                            unit: string
+                            price: string
+                            total_price: string
+                            description: string
+                            quantity: number
+                        }, i: number) => (
+                            <TableRow key={i} className='bg-green-200 hover:bg-green-200'>
+                                <TableCell className='border border-black'>{i + 1}</TableCell>
+                                <TableCell className='border border-black'>{item.description}</TableCell>
+                                <TableCell className='border border-black'>{item.quantity}</TableCell>
+                                <TableCell className='border border-black'>{item.unit}</TableCell>
+                                <TableCell className='border border-black'>{item.price}</TableCell>
+                                <TableCell className='border border-black'>{(Number(item.price) * Number(item.quantity))}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+                <div className='w-96 self-end flex flex-col text-center'>
+                    <div className='flex w-full'>
+                        <div className='p-1 border w-full border-black'>Sub Total</div>
+                        <div className='p-1 border w-full border-black bg-green-200'>SR</div>
+                        <div className='p-1 border w-full border-black'>{JSON.parse(order.items).reduce((total: number, obj: any) => {
+                            return total + (Number(obj.price) * Number(obj.quantity))
+                        }, 0)}</div>
+                    </div>
+                    <div className='flex w-full'>
+                        <div className='p-1 border w-full border-black'>Discount</div>
+                        <div className='p-1 border w-full border-black bg-green-200'>{order.discount}%</div>
+                        <div className='p-1 border w-full border-black'>{calculateDiscountedTotal()}</div>
+                    </div>
+                    <div className='flex w-full'>
+                        <div className='p-1 border w-full border-black'>VAT</div>
+                        <div className='p-1 border w-full border-black bg-green-200'>{order.discount}%</div>
+                        <div className='p-1 border w-full border-black'>{calculateTotalValue()}</div>
+                    </div>
+                    <div className='flex w-full'>
+                        <div className='p-1 border w-full border-black bg-slate-200 pr-5'>Total Value (SR)</div>
+                        <div className='p-1 border w-1/2 border-black'>{calculateTotalValue()}</div>
+                    </div>
+
+                </div>
+                <div className='w-full flex'>
+                    <div className='w-full flex flex-col text-center'>
+                        <Label className='border border-black p-1 bg-slate-200'>Prepared by</Label>
+                        <div className='border border-black p-1'>
+                            {order.prepared_by}
+                        </div>
+                    </div>
+                    <div className='w-full flex flex-col text-center'>
+                        <Label className='border border-black p-1 bg-slate-200'>Checked by</Label>
+                        <div className='border border-black p-1'>
+                            {order.checked_by}
+                        </div>
+                    </div>
+                    <div className='w-full flex flex-col text-center'>
+                        <Label className='border border-black p-1 bg-slate-200'>Approved by</Label>
+                        <div className='border border-black p-1'>
+                            {order.approved_by}
+                        </div>
+                    </div>
+
+                </div>
+                <p>This Purchase Order shall comprise of the followings:</p>
+                <ul className='flex flex-col'>
+                    <li>Section 1 - Description of Purchase and Prices</li>
+                    <li>Section 2 - Payment Terms and Invoicing Details </li>
+                    <li>Section 3 - Special Terms & Conditions</li>
+                    <li>Section 4 - Technical Specifications</li>
+                    <li>Section 5 - General Terms & Conditions</li>
+                </ul>
+            </div>
+            <div className='pt-5 border-t flex items-center gap-5 self-end'>
+                <Link href={'/admin/orders'}>
+                    <Button variant={'ghost'} className='w-40'>Back</Button>
+                </Link>
+                <Button className='w-40' onClick={handleGeneratePdf}>Print</Button>
+            </div>
+        </div>
     )
 }
 
